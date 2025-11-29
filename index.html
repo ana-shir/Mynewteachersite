@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Анна — весёлый английский для детей!</title>
+  <style>
+    * { margin: 0; padding: 0; overflow: hidden; }
+    body, html {
+      background: #f9f3ff;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Polyfill для roundRect (если браузер не поддерживает)
+    if (!ctx.roundRect) {
+      ctx.roundRect = function(x, y, width, height, radius) {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.arcTo(x + width, y, x + width, y + height, radius);
+        this.arcTo(x + width, y + height, x, y + height, radius);
+        this.arcTo(x, y + height, x, y, radius);
+        this.arcTo(x, y, x + width, y, radius);
+        this.closePath();
+        return this;
+      };
+    }
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // === ЗАГРУЗКА ИЗОБРАЖЕНИЙ ===
+    const phoneImg = new Image();
+    const busImg = new Image();
+    phoneImg.src = 'images/phone.png';   // ← твоя телефонная будка
+    busImg.src = 'images/bus.png';       // ← твой автобус
+
+    let imagesLoaded = false;
+    phoneImg.onload = busImg.onload = () => {
+      imagesLoaded = true;
+    };
+
+    // Цвета
+    const colors = {
+      bg: '#f9f3ff',
+      title: '#ff6b6b',
+      subtitle: '#4ecdc4',
+      price: '#ffd166',
+      btn: '#ff9e6d',
+      btnHover: '#ff6b6b',
+      text: '#1a535c',
+      accent: '#06d6a0'
+    };
+
+    // Кнопки
+    const buttons = [];
+
+    class Button {
+      constructor(x, y, w, h, text, action) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.text = text;
+        this.action = action;
+        this.isHover = false;
+      }
+
+      draw() {
+        ctx.fillStyle = this.isHover ? colors.btnHover : colors.btn;
+        ctx.strokeStyle = '#d32f2f';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.w, this.h, 16);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${Math.min(18, this.w / 8)}px 'Comic Sans MS'`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.text, this.x + this.w / 2, this.y + this.h / 2);
+      }
+
+      contains(x, y) {
+        return x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h;
+      }
+    }
+
+    let mouseX = 0, mouseY = 0;
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+      buttons.forEach(btn => btn.isHover = btn.contains(mouseX, mouseY));
+    });
+
+    canvas.addEventListener('click', () => {
+      buttons.forEach(btn => {
+        if (btn.contains(mouseX, mouseY)) btn.action();
+      });
+    });
+
+    // Летающие буквы
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const floatingLetters = [];
+    const vibrantColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F1C', '#6A0572', '#AB83A1', '#5BC0EB', '#9BC53D', '#06D6A0'];
+
+    class FloatingLetter {
+      constructor() {
+        this.char = letters[Math.floor(Math.random() * letters.length)];
+        this.x = Math.random() * canvas.width;
+        this.y = -30;
+        this.size = Math.random() * 20 + 16;
+        this.speed = Math.random() * 0.8 + 0.3;
+        this.color = vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotSpeed = (Math.random() - 0.5) * 0.03;
+      }
+
+      update() {
+        this.y += this.speed;
+        this.rotation += this.rotSpeed;
+        if (this.y > canvas.height + 50) {
+          this.y = -30;
+          this.x = Math.random() * canvas.width;
+        }
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.font = `bold ${this.size}px 'Comic Sans MS'`;
+        ctx.fillStyle = this.color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.char, 0, 0);
+        ctx.restore();
+      }
+    }
+
+    function initLetters() {
+      floatingLetters.length = 0;
+      const count = Math.min(25, Math.floor(canvas.width / 25));
+      for (let i = 0; i < count; i++) {
+        floatingLetters.push(new FloatingLetter());
+      }
+    }
+
+    // Английский флаг
+    function drawUKFlag(x, y, size) {
+      const s = size;
+      ctx.fillStyle = '#012169';
+      ctx.fillRect(x - s/2, y - s/2, s, s);
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(x - s/2, y - s/2); ctx.lineTo(x - s/2 + 0.2*s, y - s/2);
+      ctx.lineTo(x + s/2, y + s/2 - 0.2*s); ctx.lineTo(x + s/2, y + s/2);
+      ctx.lineTo(x + s/2 - 0.2*s, y + s/2); ctx.lineTo(x - s/2, y - s/2 + 0.2*s);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(x + s/2, y - s/2); ctx.lineTo(x + s/2 - 0.2*s, y - s/2);
+      ctx.lineTo(x - s/2, y + s/2 - 0.2*s); ctx.lineTo(x - s/2, y + s/2);
+      ctx.lineTo(x - s/2 + 0.2*s, y + s/2); ctx.lineTo(x + s/2, y - s/2 + 0.2*s);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#C8102E';
+      ctx.beginPath();
+      ctx.moveTo(x - s/2, y - s/2); ctx.lineTo(x - s/2 + 0.1*s, y - s/2);
+      ctx.lineTo(x + s/2, y + s/2 - 0.1*s); ctx.lineTo(x + s/2, y + s/2);
+      ctx.lineTo(x + s/2 - 0.1*s, y + s/2); ctx.lineTo(x - s/2, y - s/2 + 0.1*s);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(x + s/2, y - s/2); ctx.lineTo(x + s/2 - 0.1*s, y - s/2);
+      ctx.lineTo(x - s/2, y + s/2 - 0.1*s); ctx.lineTo(x - s/2, y + s/2);
+      ctx.lineTo(x - s/2 + 0.1*s, y + s/2); ctx.lineTo(x + s/2, y - s/2 + 0.1*s);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(x - s/2, y - 0.15*s, s, 0.3*s);
+      ctx.fillRect(x - 0.15*s, y - s/2, 0.3*s, s);
+
+      ctx.fillStyle = '#C8102E';
+      ctx.fillRect(x - s/2, y - 0.1*s, s, 0.2*s);
+      ctx.fillRect(x - 0.1*s, y - s/2, 0.2*s, s);
+    }
+
+    // Данные
+    const prices = [
+      { type: '👥 Групповое занятие', price: '600 ₽ / 60 мин' },
+      { type: '👤 Индивидуальное занятие', price: '1000 ₽ / 40 мин' }
+    ];
+
+    const reviews = [
+      { name: 'Маша, 10 лет', text: 'Анна — супер! Я теперь говорю на английском с котом!' },
+      { name: 'Дима, 14 лет', text: 'Сдал ОГЭ на отлично! Спасибо за игры и смех!' },
+      { name: 'Мама Алины', text: 'Ребёнок ждёт урока как праздник. Очень рекомендую!' }
+    ];
+
+    function draw() {
+      // Фон
+      ctx.fillStyle = colors.bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Радужная полоса сверху
+      const rainbow = ['#FF0000', '#FFA500', '#FFFF00', '#00FF00', '#0000FF', '#4B0082'];
+      const stripeH = 6;
+      rainbow.forEach((color, i) => {
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.15;
+        ctx.fillRect(0, i * stripeH, canvas.width, stripeH);
+      });
+      ctx.globalAlpha = 1;
+
+      // Анимированные буквы
+      floatingLetters.forEach(l => {
+        l.update();
+        l.draw();
+      });
+
+      // === ВЕРТИКАЛЬНАЯ КОМПОНОВКА ===
+      let y = 60;
+
+      // Заголовок
+      ctx.font = `bold ${Math.min(42, canvas.width / 8)}px 'Comic Sans MS'`;
+      ctx.fillStyle = colors.title;
+      ctx.textAlign = 'center';
+      ctx.fillText('✨ АННА — ВЕСЁЛЫЙ АНГЛИЙСКИЙ! ✨', canvas.width / 2, y);
+      y += 50;
+
+      // Подзаголовок
+      ctx.font = `${Math.min(20, canvas.width / 18)}px 'Comic Sans MS'`;
+      ctx.fillStyle = colors.subtitle;
+      ctx.fillText('Для детей и взрослых • Онлайн и офлайн • ЕГЭ/ОГЭ/Разговорка', canvas.width / 2, y);
+      y += 60;
+
+      // Флаг
+      const flagSize = Math.min(60, canvas.width / 6);
+      drawUKFlag(canvas.width / 2, y, flagSize);
+      y += flagSize + 40;
+
+      // Цены — две строки
+      const priceFontSize = Math.min(18, canvas.width / 22);
+      ctx.font = `bold ${priceFontSize}px 'Comic Sans MS'`;
+      ctx.textAlign = 'center';
+
+      prices.forEach((item, i) => {
+        const blockY = y + i * (priceFontSize * 2 + 25);
+        ctx.fillStyle = colors.text;
+        ctx.fillText(item.type, canvas.width / 2, blockY);
+        ctx.fillStyle = colors.price;
+        ctx.fillText(item.price, canvas.width / 2, blockY + priceFontSize + 8);
+      });
+
+      y += prices.length * (priceFontSize * 2 + 25) + 30;
+
+      // Отзывы
+      ctx.font = `${Math.min(16, canvas.width / 22)}px 'Comic Sans MS'`;
+      reviews.forEach((rev, i) => {
+        ctx.fillStyle = '#444';
+        ctx.fillText(`"${rev.text}"`, canvas.width / 2, y + i * 45);
+        ctx.fillStyle = colors.accent;
+        ctx.fillText(`— ${rev.name}`, canvas.width / 2, y + i * 45 + 20);
+      });
+      y += reviews.length * 45 + 50;
+
+      // Кнопки
+      buttons.length = 0;
+      const btnW = Math.min(200, canvas.width * 0.45);
+      const btnH = 48;
+      const gap = 15;
+      const btnY = y;
+
+      buttons.push(new Button(canvas.width / 2 - btnW - gap/2, btnY, btnW, btnH, '💬 WhatsApp', () => window.open('https://wa.me/79991234567', '_blank')));
+      buttons.push(new Button(canvas.width / 2 + gap/2, btnY, btnW, btnH, '✈️ Telegram', () => window.open('https://t.me/anna_english', '_blank')));
+      buttons.push(new Button(canvas.width / 2 - btnW / 2, btnY + btnH + gap, btnW, btnH, '📅 Записаться', () => alert('Выберите удобное время!\n(В демоверсии — имитация.)')));
+
+      buttons.forEach(btn => btn.draw());
+
+      // === ОТРИСОВКА ТВОИХ КАРТИНОК ===
+      if (canvas.width > 600 && imagesLoaded) {
+        // Телефонная будка: 240×400 пикс.
+        ctx.drawImage(phoneImg, 240, canvas.height - 240, 240, 200);
+
+        // Лондонский автобус: 360×240 пикс.
+        ctx.drawImage(busImg, canvas.width - 400, canvas.height - 240, 240, 240);
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    initLetters();
+    draw();
+  </script>
+</body>
+</html>

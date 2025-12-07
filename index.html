@@ -5,154 +5,486 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Анна — весёлый английский для детей!</title>
   <style>
-    * { margin: 0; padding: 0; overflow: hidden; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body, html {
       background: #f9f3ff;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      scroll-behavior: smooth;
+      position: relative;
+      overflow-x: hidden;
       height: 100%;
+    }
+
+    /* ЗАКРЕПЛЁННЫЙ заголовок */
+    .hero-title {
+      position: fixed;
+      top: 60px; /* высота меню ≈ 60px */
+      left: 0;
+      width: 100%;
+      text-align: center;
+      padding: 12px 0;
+      font-size: clamp(28px, 6vw, 48px);
+      font-weight: bold;
+      color: #ff6b6b;
+      text-shadow: 2px 2px 0 #ffd166, 4px 4px 0 rgba(0,0,0,0.1);
+      z-index: 999;
+      background: rgba(249, 243, 255, 0.85); /* легкий подложка, чтобы текст читался при скролле */
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      line-height: 1.1;
+    }
+    .hero-title span {
+      background: linear-gradient(45deg, #FF0000, #FFA500, #FFFF00, #00FF00, #0000FF, #4B0082);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 300% 300%;
+      animation: rainbow 6s ease infinite;
+    }
+
+    /* Фиксированное меню — в самом верху */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: linear-gradient(90deg, #ff9e6d, #ffd166, #a0e9ff, #ff9e6d);
+      background-size: 300% 300%;
+      animation: joyGradient 10s ease infinite;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 1000;
+      padding: 12px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    @keyframes joyGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    nav ul {
       display: flex;
       justify-content: center;
-      align-items: center;
-      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      flex-wrap: wrap;
+      gap: 16px;
+      list-style: none;
+      padding: 0 20px;
     }
-    canvas {
+    nav a {
+      text-decoration: none;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      background: linear-gradient(45deg, #FF0000, #FFA500, #FFFF00, #00FF00, #0000FF, #4B0082);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 300% 300%;
+      animation: rainbow 8s ease infinite;
+    }
+    nav a:hover {
+      animation: none;
+      background: linear-gradient(45deg, #FF0000, #FFA500, #FFFF00, #00FF00, #0000FF, #4B0082);
+      background-clip: padding-box;
+      color: white;
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 4px 12px rgba(255,107,107,0.4);
+    }
+
+    @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Контент начинается ниже заголовка */
+    .main-content {
+      margin-top: 120px; /* ≈ меню (60px) + заголовок (60px) */
+    }
+
+    section {
+      min-height: 100vh;
+      padding: 60px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ff6b6b;
+      font-size: clamp(28px, 6vw, 42px);
+    }
+    h2 {
+      font-size: clamp(24px, 5vw, 32px);
+      color: #4ecdc4;
+    }
+    .content {
+      background: white;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+      position: relative;
+    }
+    .prices-list, .reviews-list, .materials-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .price-item, .review-item, .material-item {
+      padding: 16px;
+      background: #fef7ff;
+      border-radius: 16px;
+      border-left: 4px solid #ffd166;
+    }
+    .price-title {
+      font-weight: bold;
+      color: #1a535c;
+      font-size: 18px;
+    }
+    .price-value {
+      color: #ffd166;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .review-text {
+      font-style: italic;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .review-author {
+      color: #06d6a0;
+      font-weight: bold;
+    }
+    .material-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #ff9e6d;
+      text-decoration: underline;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      background: #ff9e6d;
+      color: white;
+      text-decoration: none;
+      border-radius: 20px;
+      font-weight: bold;
+      transition: background 0.3s;
+      border: 2px solid #d32f2f;
+    }
+    .btn:hover {
+      background: #ff6b6b;
+    }
+    .btn-group {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .btn-group a {
+      margin: 0 10px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #777;
+      font-size: 14px;
+      z-index: 2;
+      position: relative;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+    .about-photo {
+      border-radius: 16px;
+      height: 480px;
+	  width:  160px
+      background: #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .about-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .about-text {
+      line-height: 1.6;
+    }
+    .uk-flag {
       position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 60px;
+      height: 30px;
+      z-index: 2;
+    }
+
+    /* Изображения на уровне заголовка */
+    .phone-booth, .london-bus {
+      position: fixed;
+      z-index: 1998;
+      opacity: 0.9;
+      width: 120px;
+      height: auto;
+      top: 60px; /* на уровне заголовка */
+    }
+    .phone-booth {
+      left: 30px;
+    }
+    .london-bus {
+      right: 30px;
+    }
+
+    canvas#bgCanvas {
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        top: 50px;
+        font-size: clamp(24px, 6vw, 36px);
+        padding: 8px 0;
+      }
+      .phone-booth, .london-bus {
+        display: none;
+      }
+      nav ul {
+        gap: 8px;
+      }
+      nav a {
+        padding: 6px 12px;
+        font-size: 14px;
+      }
+      .btn-group a {
+        display: block;
+        margin: 10px 0;
+      }
+      .main-content {
+        margin-top: 110px;
+      }
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+
+  <canvas id="bgCanvas"></canvas>
+
+  <nav>
+    <ul>
+      <li><a href="#about">Обо мне</a></li>
+      <li><a href="#prices">Цены</a></li>
+      <li><a href="#reviews">Отзывы</a></li>
+      <li><a href="#signup">Записаться</a></li>
+      <li><a href="#materials">Материалы</a></li>
+    </ul>
+  </nav>
+
+  <!-- Закреплённый заголовок -->
+  <div class="hero-title">
+    <span>Анна — весёлый английский для детей!</span>
+  </div>
+
+  <!-- Картинки на уровне заголовка -->
+  <img src="images/phone.png" alt="Телефонная будка" class="phone-booth">
+  <img src="images/bus.png" alt="Лондонский автобус" class="london-bus">
+
+  <div class="main-content">
+
+    <section id="about">
+      <h2>✨ Обо мне</h2>
+      <div class="content">
+        <div class="about-grid">
+          <!-- Фото из файла photo.jpg -->
+          <div class="about-photo">
+            <img src="images/photo.png" alt="Анна — преподаватель английского">
+          </div>
+          <div class="about-text">
+            <p>Привет! Меня зовут Анна, и я преподаю английский язык с 2015 года. Моя миссия — сделать изучение языка увлекательным, живым и доступным для детей и подростков.</p>
+            <br>
+            <p>Я использую игры, песни, мультфильмы и реальные диалоги, чтобы дети не просто запоминали слова, а действительно начинали <strong>думать и говорить</strong> на английском!</p>
+            <br>
+            <p>Работаю как онлайн, так и офлайн в Санкт-Петербурге. Готовлю к ОГЭ, ЕГЭ и международным экзаменам (PET, FCE), а также веду разговорные клубы и индивидуальные занятия.</p>
+          </div>
+        </div>
+
+        <svg class="uk-flag" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+          <rect width="60" height="30" fill="#012169"/>
+          <g fill="#fff">
+            <path d="M0 0h60v30H0z"/>
+            <path d="M0 0h60v5H0z" transform="rotate(26.565 30 15)"/>
+            <path d="M0 0h60v5H0z" transform="rotate(-26.565 30 15)"/>
+          </g>
+          <g fill="#c8102e">
+            <path d="M0 13h60v4H0z"/>
+            <path d="M28 0h4v30h-4z"/>
+            <path d="M0 0h60v2H0z" transform="rotate(26.565 30 15)"/>
+            <path d="M0 0h60v2H0z" transform="rotate(-26.565 30 15)"/>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section id="prices">
+      <h2>💰 Цены</h2>
+      <div class="content">
+        <div class="prices-list">
+          <div class="price-item">
+            <div class="price-title">👥 Групповое занятие</div>
+            <div class="price-value">600 ₽ / 60 мин</div>
+          </div>
+          <div class="price-item">
+            <div class="price-title">👤 Индивидуальное занятие</div>
+            <div class="price-value">1000 ₽ / 40 мин</div>
+          </div>
+          <div class="price-item">
+            <div class="price-title">🎓 Подготовка к ЕГЭ/ОГЭ (индивидуально)</div>
+            <div class="price-value">1200 ₽ / 60 мин</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reviews">
+      <h2>🌟 Отзывы</h2>
+      <div class="content">
+        <div class="reviews-list">
+          <div class="review-item">
+            <div class="review-text">«Анна — супер! Я теперь говорю на английском с котом!»</div>
+            <div class="review-author">— Маша, 10 лет</div>
+          </div>
+          <div class="review-item">
+            <div class="review-text">«Сдал ОГЭ на отлично! Спасибо за игры и смех!»</div>
+            <div class="review-author">— Дима, 14 лет</div>
+          </div>
+          <div class="review-item">
+            <div class="review-text">«Ребёнок ждёт урока как праздник. Очень рекомендую!»</div>
+            <div class="review-author">— Мама Алины</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="signup">
+      <h2>📅 Записаться на занятие</h2>
+      <div class="content">
+        <p>Выберите удобный способ связи — я отвечу в течение часа!</p>
+        <div class="btn-group">
+          <a href="https://wa.me/79991234567" target="_blank" class="btn">💬 WhatsApp</a>
+          <a href="https://t.me/anna_english" target="_blank" class="btn">✈️ Telegram</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="materials">
+      <h2>📚 Полезные материалы</h2>
+      <div class="content">
+        <div class="materials-list">
+          <div class="material-item">
+            <strong>Английский для начинающих (5–8 лет)</strong><br>
+            Подборка весёлых видео, песен и карточек.
+            <a href="#" class="material-link">Скачать PDF</a>
+          </div>
+          <div class="material-item">
+            <strong>Разговорные фразы для подростков</strong><br>
+            Чек-лист для повседневного общения.
+            <a href="#" class="material-link">Скачать PDF</a>
+          </div>
+          <div class="material-item">
+            <strong>Тренировка аудирования (ОГЭ)</strong><br>
+            Аудио + задания с ответами.
+            <a href="#" class="material-link">Скачать ZIP</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Анна — весёлый английский для детей! © 2025
+    </footer>
+
+  </div>
 
   <script>
-    const canvas = document.getElementById('canvas');
+    const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Polyfill для roundRect (если браузер не поддерживает)
-    if (!ctx.roundRect) {
-      ctx.roundRect = function(x, y, width, height, radius) {
-        if (width < 2 * radius) radius = width / 2;
-        if (height < 2 * radius) radius = height / 2;
-        this.beginPath();
-        this.moveTo(x + radius, y);
-        this.arcTo(x + width, y, x + width, y + height, radius);
-        this.arcTo(x + width, y + height, x, y + height, radius);
-        this.arcTo(x, y + height, x, y, radius);
-        this.arcTo(x, y, x + width, y, radius);
-        this.closePath();
-        return this;
-      };
-    }
-
-    function resize() {
+    function resizeCanvas() {
       canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    // === ЗАГРУЗКА ИЗОБРАЖЕНИЙ ===
-    const phoneImg = new Image();
-    const busImg = new Image();
-    phoneImg.src = 'images/phone.png';   // ← твоя телефонная будка
-    busImg.src = 'images/bus.png';       // ← твой автобус
-
-    let imagesLoaded = false;
-    phoneImg.onload = busImg.onload = () => {
-      imagesLoaded = true;
-    };
-
-    // Цвета
-    const colors = {
-      bg: '#f9f3ff',
-      title: '#ff6b6b',
-      subtitle: '#4ecdc4',
-      price: '#ffd166',
-      btn: '#ff9e6d',
-      btnHover: '#ff6b6b',
-      text: '#1a535c',
-      accent: '#06d6a0'
-    };
-
-    // Кнопки
-    const buttons = [];
-
-    class Button {
-      constructor(x, y, w, h, text, action) {
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.text = text;
-        this.action = action;
-        this.isHover = false;
-      }
-
-      draw() {
-        ctx.fillStyle = this.isHover ? colors.btnHover : colors.btn;
-        ctx.strokeStyle = '#d32f2f';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.roundRect(this.x, this.y, this.w, this.h, 16);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = 'white';
-        ctx.font = `bold ${Math.min(18, this.w / 8)}px 'Comic Sans MS'`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.text, this.x + this.w / 2, this.y + this.h / 2);
-      }
-
-      contains(x, y) {
-        return x >= this.x && x <= this.x + this.w && y >= this.y && y <= this.y + this.h;
-      }
+      canvas.height = Math.max(document.body.scrollHeight, window.innerHeight);
     }
 
-    let mouseX = 0, mouseY = 0;
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top;
-      buttons.forEach(btn => btn.isHover = btn.contains(mouseX, mouseY));
-    });
+    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('load', resizeCanvas);
+    resizeCanvas();
 
-    canvas.addEventListener('click', () => {
-      buttons.forEach(btn => {
-        if (btn.contains(mouseX, mouseY)) btn.action();
-      });
-    });
-
-    // Летающие буквы
     const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const floatingLetters = [];
     const vibrantColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F1C', '#6A0572', '#AB83A1', '#5BC0EB', '#9BC53D', '#06D6A0'];
+    const floatingLetters = [];
 
     class FloatingLetter {
       constructor() {
+        this.reset();
+      }
+
+      reset() {
         this.char = letters[Math.floor(Math.random() * letters.length)];
         this.x = Math.random() * canvas.width;
-        this.y = -30;
-        this.size = Math.random() * 20 + 16;
-        this.speed = Math.random() * 0.8 + 0.3;
+        this.y = -50;
+        this.size = (Math.random() * 20 + 16) * 1.2; // крупнее
+        // ✅ Скорость ×1.5
+        this.speed = (Math.random() * 0.8 + 0.3) * 1.5;
         this.color = vibrantColors[Math.floor(Math.random() * vibrantColors.length)];
-        this.rotation = Math.random() * Math.PI * 2;
-        this.rotSpeed = (Math.random() - 0.5) * 0.03;
+        this.rotation = (Math.random() - 0.5) * 1.4;
+        this.rotSpeed = (Math.random() - 0.5) * 0.04;
       }
 
       update() {
         this.y += this.speed;
         this.rotation += this.rotSpeed;
-        if (this.y > canvas.height + 50) {
-          this.y = -30;
+
+        if (this.rotation > 0.7) {
+          this.rotation = 0.7;
+          this.rotSpeed = -Math.abs(this.rotSpeed);
+        } else if (this.rotation < -0.7) {
+          this.rotation = -0.7;
+          this.rotSpeed = Math.abs(this.rotSpeed);
+        }
+
+        if (this.y > canvas.height + 100) {
+          this.reset();
           this.x = Math.random() * canvas.width;
         }
       }
 
-      draw() {
+      draw(ctx) {
         ctx.save();
+        ctx.globalAlpha = 0.85;
         ctx.translate(this.x, this.y);
         ctx.rotate(this.rotation);
         ctx.font = `bold ${this.size}px 'Comic Sans MS'`;
@@ -166,163 +498,27 @@
 
     function initLetters() {
       floatingLetters.length = 0;
-      const count = Math.min(25, Math.floor(canvas.width / 25));
+      const count = Math.min(25, Math.floor(canvas.width / 22));
       for (let i = 0; i < count; i++) {
         floatingLetters.push(new FloatingLetter());
       }
     }
 
-    // Английский флаг
-    function drawUKFlag(x, y, size) {
-      const s = size;
-      ctx.fillStyle = '#012169';
-      ctx.fillRect(x - s/2, y - s/2, s, s);
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.moveTo(x - s/2, y - s/2); ctx.lineTo(x - s/2 + 0.2*s, y - s/2);
-      ctx.lineTo(x + s/2, y + s/2 - 0.2*s); ctx.lineTo(x + s/2, y + s/2);
-      ctx.lineTo(x + s/2 - 0.2*s, y + s/2); ctx.lineTo(x - s/2, y - s/2 + 0.2*s);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(x + s/2, y - s/2); ctx.lineTo(x + s/2 - 0.2*s, y - s/2);
-      ctx.lineTo(x - s/2, y + s/2 - 0.2*s); ctx.lineTo(x - s/2, y + s/2);
-      ctx.lineTo(x - s/2 + 0.2*s, y + s/2); ctx.lineTo(x + s/2, y - s/2 + 0.2*s);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#C8102E';
-      ctx.beginPath();
-      ctx.moveTo(x - s/2, y - s/2); ctx.lineTo(x - s/2 + 0.1*s, y - s/2);
-      ctx.lineTo(x + s/2, y + s/2 - 0.1*s); ctx.lineTo(x + s/2, y + s/2);
-      ctx.lineTo(x + s/2 - 0.1*s, y + s/2); ctx.lineTo(x - s/2, y - s/2 + 0.1*s);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(x + s/2, y - s/2); ctx.lineTo(x + s/2 - 0.1*s, y - s/2);
-      ctx.lineTo(x - s/2, y + s/2 - 0.1*s); ctx.lineTo(x - s/2, y + s/2);
-      ctx.lineTo(x - s/2 + 0.1*s, y + s/2); ctx.lineTo(x + s/2, y - s/2 + 0.1*s);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillRect(x - s/2, y - 0.15*s, s, 0.3*s);
-      ctx.fillRect(x - 0.15*s, y - s/2, 0.3*s, s);
-
-      ctx.fillStyle = '#C8102E';
-      ctx.fillRect(x - s/2, y - 0.1*s, s, 0.2*s);
-      ctx.fillRect(x - 0.1*s, y - s/2, 0.2*s, s);
-    }
-
-    // Данные
-    const prices = [
-      { type: '👥 Групповое занятие', price: '600 ₽ / 60 мин' },
-      { type: '👤 Индивидуальное занятие', price: '1000 ₽ / 40 мин' }
-    ];
-
-    const reviews = [
-      { name: 'Маша, 10 лет', text: 'Анна — супер! Я теперь говорю на английском с котом!' },
-      { name: 'Дима, 14 лет', text: 'Сдал ОГЭ на отлично! Спасибо за игры и смех!' },
-      { name: 'Мама Алины', text: 'Ребёнок ждёт урока как праздник. Очень рекомендую!' }
-    ];
-
-    function draw() {
-      // Фон
-      ctx.fillStyle = colors.bg;
+    function drawBackground() {
+      resizeCanvas();
+      ctx.fillStyle = '#f9f3ff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Радужная полоса сверху
-      const rainbow = ['#FF0000', '#FFA500', '#FFFF00', '#00FF00', '#0000FF', '#4B0082'];
-      const stripeH = 6;
-      rainbow.forEach((color, i) => {
-        ctx.fillStyle = color;
-        ctx.globalAlpha = 0.15;
-        ctx.fillRect(0, i * stripeH, canvas.width, stripeH);
-      });
-      ctx.globalAlpha = 1;
-
-      // Анимированные буквы
       floatingLetters.forEach(l => {
         l.update();
-        l.draw();
+        l.draw(ctx);
       });
 
-      // === ВЕРТИКАЛЬНАЯ КОМПОНОВКА ===
-      let y = 60;
-
-      // Заголовок
-      ctx.font = `bold ${Math.min(42, canvas.width / 8)}px 'Comic Sans MS'`;
-      ctx.fillStyle = colors.title;
-      ctx.textAlign = 'center';
-      ctx.fillText('✨ АННА — ВЕСЁЛЫЙ АНГЛИЙСКИЙ! ✨', canvas.width / 2, y);
-      y += 50;
-
-      // Подзаголовок
-      ctx.font = `${Math.min(20, canvas.width / 18)}px 'Comic Sans MS'`;
-      ctx.fillStyle = colors.subtitle;
-      ctx.fillText('Для детей и взрослых • Онлайн и офлайн • ЕГЭ/ОГЭ/Разговорка', canvas.width / 2, y);
-      y += 60;
-
-      // Флаг
-      const flagSize = Math.min(60, canvas.width / 6);
-      drawUKFlag(canvas.width / 2, y, flagSize);
-      y += flagSize + 40;
-
-      // Цены — две строки
-      const priceFontSize = Math.min(18, canvas.width / 22);
-      ctx.font = `bold ${priceFontSize}px 'Comic Sans MS'`;
-      ctx.textAlign = 'center';
-
-      prices.forEach((item, i) => {
-        const blockY = y + i * (priceFontSize * 2 + 25);
-        ctx.fillStyle = colors.text;
-        ctx.fillText(item.type, canvas.width / 2, blockY);
-        ctx.fillStyle = colors.price;
-        ctx.fillText(item.price, canvas.width / 2, blockY + priceFontSize + 8);
-      });
-
-      y += prices.length * (priceFontSize * 2 + 25) + 30;
-
-      // Отзывы
-      ctx.font = `${Math.min(16, canvas.width / 22)}px 'Comic Sans MS'`;
-      reviews.forEach((rev, i) => {
-        ctx.fillStyle = '#444';
-        ctx.fillText(`"${rev.text}"`, canvas.width / 2, y + i * 45);
-        ctx.fillStyle = colors.accent;
-        ctx.fillText(`— ${rev.name}`, canvas.width / 2, y + i * 45 + 20);
-      });
-      y += reviews.length * 45 + 50;
-
-      // Кнопки
-      buttons.length = 0;
-      const btnW = Math.min(200, canvas.width * 0.45);
-      const btnH = 48;
-      const gap = 15;
-      const btnY = y;
-
-      buttons.push(new Button(canvas.width / 2 - btnW - gap/2, btnY, btnW, btnH, '💬 WhatsApp', () => window.open('https://wa.me/79991234567', '_blank')));
-      buttons.push(new Button(canvas.width / 2 + gap/2, btnY, btnW, btnH, '✈️ Telegram', () => window.open('https://t.me/anna_english', '_blank')));
-      buttons.push(new Button(canvas.width / 2 - btnW / 2, btnY + btnH + gap, btnW, btnH, '📅 Записаться', () => alert('Выберите удобное время!\n(В демоверсии — имитация.)')));
-
-      buttons.forEach(btn => btn.draw());
-
-      // === ОТРИСОВКА ТВОИХ КАРТИНОК ===
-      if (canvas.width > 600 && imagesLoaded) {
-        // Телефонная будка: 240×400 пикс.
-        ctx.drawImage(phoneImg, 240, canvas.height - 240, 240, 200);
-
-        // Лондонский автобус: 360×240 пикс.
-        ctx.drawImage(busImg, canvas.width - 400, canvas.height - 240, 240, 240);
-      }
-
-      requestAnimationFrame(draw);
+      requestAnimationFrame(drawBackground);
     }
 
     initLetters();
-    draw();
+    drawBackground();
   </script>
 </body>
 </html>

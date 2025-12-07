@@ -191,7 +191,7 @@
       text-align: center;
       margin-top: 20px;
     }
-    .btn-group a {
+    .btn-group a, .btn-group button {
       margin: 0 10px;
     }
     footer {
@@ -212,7 +212,7 @@
     .about-photo {
       border-radius: 16px;
       height: 480px;
-	  width:  160px
+      width:  320px;
       background: #e0e0e0;
       display: flex;
       align-items: center;
@@ -262,6 +262,21 @@
       pointer-events: none;
     }
 
+    /* Стили для колеса фортуны */
+    #fortuneModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.85);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
     @media (max-width: 768px) {
       .hero-title {
         top: 50px;
@@ -278,7 +293,7 @@
         padding: 6px 12px;
         font-size: 14px;
       }
-      .btn-group a {
+      .btn-group a, .btn-group button {
         display: block;
         margin: 10px 0;
       }
@@ -302,6 +317,7 @@
       <li><a href="#reviews">Отзывы</a></li>
       <li><a href="#signup">Записаться</a></li>
       <li><a href="#materials">Материалы</a></li>
+      <li><a href="#fortune">Колесо</a></li>
     </ul>
   </nav>
 
@@ -401,6 +417,18 @@
       </div>
     </section>
 
+    <!-- === КОЛЕСО ФОРТУНЫ === -->
+    <section id="fortune">
+      <h2>🎡 Колесо фортуны</h2>
+      <div class="content">
+        <p>Крути колесо и получи подарок на первое занятие! Можно использовать только один раз.</p>
+        <div class="btn-group">
+          <button id="openFortuneWheel" class="btn">🎡 Попробовать удачу!</button>
+          <button id="devModeBtn" class="btn" style="background:#6A0572; border-color:#4B0082;">🛠️ Режим разработчика</button>
+        </div>
+      </div>
+    </section>
+
     <section id="materials">
       <h2>📚 Полезные материалы</h2>
       <div class="content">
@@ -428,9 +456,20 @@
       Анна — весёлый английский для детей! © 2025
     </footer>
 
+    <!-- Модальное окно колеса -->
+    <div id="fortuneModal">
+      <div style="position:relative; width:450px; height:450px; margin-bottom:30px;">
+        <canvas id="fortuneWheel" width="450" height="450" style="border-radius:50%;"></canvas>
+        <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:0; height:0; border-left:14px solid transparent; border-right:14px solid transparent; border-top:28px solid #ff6b6b;"></div>
+      </div>
+      <button id="spinButton" class="btn" style="padding:12px 32px; font-size:18px;">КРУТИ!</button>
+      <button id="closeFortuneModal" style="margin-top:20px; background:#ccc; border:none; padding:8px 16px; border-radius:12px; cursor:pointer;">Закрыть</button>
+    </div>
+
   </div>
 
   <script>
+    // === ОРИГИНАЛЬНЫЙ ФОН (летающие буквы) ===
     const canvas = document.getElementById('bgCanvas');
     const ctx = canvas.getContext('2d');
 
@@ -519,6 +558,121 @@
 
     initLetters();
     drawBackground();
+
+    // === КОЛЕСО ФОРТУНЫ С РЕЖИМОМ РАЗРАБОТЧИКА ===
+    document.addEventListener('DOMContentLoaded', () => {
+      const DEV_CODE = '123456';
+      const openBtn = document.getElementById('openFortuneWheel');
+      const devBtn = document.getElementById('devModeBtn');
+      const modal = document.getElementById('fortuneModal');
+      const closeBtn = document.getElementById('closeFortuneModal');
+      const spinBtn = document.getElementById('spinButton');
+      const canvas = document.getElementById('fortuneWheel');
+      const ctx = canvas.getContext('2d');
+
+      let isDevMode = localStorage.getItem('fortuneDevMode') === 'true';
+      let isUsed = localStorage.getItem('fortuneUsed') === 'true';
+
+      function updateOpenButton() {
+        if (!isDevMode && isUsed) {
+          openBtn.disabled = true;
+          openBtn.textContent = 'Уже использовано 😊';
+          openBtn.style.opacity = '0.6';
+        } else {
+          openBtn.disabled = false;
+          openBtn.textContent = '🎡 Попробовать удачу!';
+          openBtn.style.opacity = '1';
+        }
+      }
+      updateOpenButton();
+
+      const prizes = [
+        { text: 'Скидка на первый месяц 10%', color: '#FF6B6B' },
+        { text: 'Бесплатный урок', color: '#4ECDC4' },
+        { text: 'Полезная ПДФка', color: '#FFE66D' },
+        { text: 'Скидка первый урок 20%', color: '#FF9F1C' },
+        { text: 'ПОДАРОК', color: '#6A0572' }
+      ];
+
+      function drawWheel() {
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2;
+
+        prizes.forEach((prize, i) => {
+          const startAngle = (i * 72 - 90) * Math.PI / 180;
+          const endAngle = ((i + 1) * 72 - 90) * Math.PI / 180;
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+          ctx.closePath();
+          ctx.fillStyle = prize.color;
+          ctx.fill();
+          ctx.strokeStyle = '#fff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate((startAngle + endAngle) / 2);
+          ctx.textAlign = 'right';
+          ctx.fillStyle = '#000';
+          ctx.font = 'bold 12px Arial';
+          ctx.fillText(prize.text, radius - 20, 8);
+          ctx.restore();
+        });
+      }
+      drawWheel();
+
+      devBtn.addEventListener('click', () => {
+        const input = prompt('Введите код разработчика:');
+        if (input === DEV_CODE) {
+          isDevMode = true;
+          localStorage.setItem('fortuneDevMode', 'true');
+          alert('✅ Режим разработчика включён! Теперь колесо можно крутить бесконечно.');
+          updateOpenButton();
+        } else {
+          alert('❌ Неверный код.');
+        }
+      });
+
+      let isSpinning = false;
+
+      spinBtn.addEventListener('click', () => {
+        if (isSpinning) return;
+        isSpinning = true;
+        spinBtn.disabled = true;
+
+        const randomIndex = Math.floor(Math.random() * prizes.length);
+        const targetDeg = 3600 + (360 - (randomIndex * 72 + 36));
+
+        canvas.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        canvas.style.transform = `rotate(${targetDeg}deg)`;
+
+        setTimeout(() => {
+          alert(`🎉 Поздравляем! Твой приз: ${prizes[randomIndex].text}`);
+
+          if (!isDevMode) {
+            localStorage.setItem('fortuneUsed', 'true');
+            isUsed = true;
+            updateOpenButton();
+          }
+
+          isSpinning = false;
+          modal.style.display = 'none';
+        }, 4100);
+      });
+
+      openBtn.addEventListener('click', () => {
+        if (!isDevMode && isUsed) return;
+        modal.style.display = 'flex';
+      });
+
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    });
   </script>
 </body>
 </html>
